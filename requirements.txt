@@ -1,0 +1,28 @@
+langchain-community>=0.0.20
+
+# LLM 
+# langchain-anthropic
+# anthropic
+langchain-groq
+
+langgraph
+pypdf>=3.17.0
+pandas>=2.0.0
+sentence-transformers 
+qdrant-client==1.12.1
+        
+
+# Data Processing & Utilities
+numpy>=2.2.1                   
+python-dotenv>=1.0.1          
+
+# Development Tools
+pytest>=8.3.4                  
+pytest-asyncio>=0.24.0         
+black>=24.10.0                 
+flake8>=7.1.1                  
+mypy>=1.13.0                   
+
+# Progress & Logging
+tqdm>=4.67.1                  
+loguru>=0.7.3                  
