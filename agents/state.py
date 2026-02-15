@@ -8,6 +8,6 @@ class AgentState(TypedDict):
     
     final_answer: str
     
-    messages: Annotated[List[str], add]
+    messages: List[str]
     
     current_step: str

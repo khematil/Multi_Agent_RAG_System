@@ -3,9 +3,10 @@ from utils import get_qdrant_client, get_embedding_model
 from config import COLLECTION_NAME
 
 def query_agent(state: AgentState) -> AgentState:
+    print("\n🔍 ========== QUERY AGENT ENTRY ==========")
     query = state['query']
     
-    state["messages"].append(f"Query Agent: Processing '{query}'")
+    state["messages"].append(f"[Query Agent]: Processing '{query}'")
     
     client = get_qdrant_client()
     model = get_embedding_model()
@@ -30,6 +31,6 @@ def query_agent(state: AgentState) -> AgentState:
         
     state['retrieved_chunks'] = retrieved_chunks
     state['current_step'] = 'response'
-    state["messages"].append(f"Query Agent: Found {len(retrieved_chunks)} chunks.")
+    state["messages"].append(f"[Query Agent]: Found {len(retrieved_chunks)} chunks.")
     
     return state

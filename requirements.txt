@@ -25,4 +25,8 @@ mypy>=1.13.0
 
 # Progress & Logging
 tqdm>=4.67.1                  
-loguru>=0.7.3                  
+loguru>=0.7.3           
+
+# Visualization
+
+
