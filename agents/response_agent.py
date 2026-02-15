@@ -2,7 +2,6 @@ from agents.state import AgentState
 from utils import get_llm
 
 def response_agent(state: AgentState) -> AgentState:
-    print("\n🤖 ========== RESPONSE AGENT ENTRY ==========")   
     query = state['query']
     chunks = state['retrieved_chunks']
     

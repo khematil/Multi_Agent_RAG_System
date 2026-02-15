@@ -1,9 +1,9 @@
 from config import COLLECTION_NAME
-from utils import get_qdrant_client, get_embedding_model
+from graph import run_rag_query
+
 
 def query_rag(client, model, question: str, n_results: int = 5):
 
-    
     query_vector = model.encode([question])[0]
     
     results = client.query_points(
@@ -14,24 +14,25 @@ def query_rag(client, model, question: str, n_results: int = 5):
     
     return results.points
 
-def display_results(results):
+def display_results(result):
     print("\n" + "="*80)
     
-    for i, result in enumerate(results, 1):
-        print(f"\n[{i}] Similarity: {result.score:.3f}")
-        print(f"Source: {result.payload.get('source_file', 'Unknown')}")
-        print(f"Chunk: {result.payload.get('chunk_index', 'N/A')}")
-        print(f"\n{result.payload.get('text', '')}\n")
-        print("-"*80)
+    print("Answer:")
+    print(f"{result['final_answer']}\n")
     
+    print(f"Sources:")
+    for i, chunk in enumerate(result['retrieved_chunks'][:3], 1):
+        print(f"  [{i}] {chunk['source']} (chunk {chunk['chunk_index']}) - [Score] {chunk['score']:.3f}")
     
-def main():
-    print("RAG Query CLI")
+    print(f"\nAgent Flow:")
+    for msg in result['messages']:
+        print(f"{msg}") 
+    
+    print("=" * 80)
+    
+def query_cli():
+    print("[RAG Query CLI -- LangGraph Orchestration]")
     print("Type 'quit' to exit\n")
-    
-    client = get_qdrant_client()
-    model = get_embedding_model()
-    
     
     while True:
         question = input("Your question: ").strip()
@@ -44,10 +45,10 @@ def main():
         
         try:
             
-            results = query_rag(client, model, question, n_results = 5)
+            result = run_rag_query(question)
             
-            if results:
-                display_results(results)
+            if result:
+                display_results(result)
                 
             else:
                 print("No results found.")
@@ -55,9 +56,9 @@ def main():
         except Exception as e:
             print(f"Error: {e}")
             
+            
 if __name__ == "__main__":
-    main()
-                
+    query_cli()
             
                                 
                                 

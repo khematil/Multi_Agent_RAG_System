@@ -3,7 +3,6 @@ from utils import get_qdrant_client, get_embedding_model
 from config import COLLECTION_NAME
 
 def query_agent(state: AgentState) -> AgentState:
-    print("\n🔍 ========== QUERY AGENT ENTRY ==========")
     query = state['query']
     
     state["messages"].append(f"[Query Agent]: Processing '{query}'")

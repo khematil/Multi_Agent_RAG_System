@@ -39,7 +39,6 @@ def run_rag_query(query: str):
     return final_state
     
 
-
 def display_graph():
     app = create_graph()
     
@@ -47,27 +46,3 @@ def display_graph():
     
     with open("graph_visual.png", "wb") as f:
         f.write(graph_visual)
-
-
-if __name__ == "__main__":
-    
-    query = "What is the CAP theorem?"
-    
-    print(f"\nQuestion: {query}\n")
-    
-    result = run_rag_query(query)
-    
-    print(f"\nAnswer:")
-    print(f"{result['final_answer']}\n")
-    
-    print(f"Sources:")
-    for i, chunk in enumerate(result['retrieved_chunks'][:3], 1):
-        print(f"  [{i}] {chunk['source']} (chunk {chunk['chunk_index']}) - {chunk['score']:.3f}")
-    
-    print(f"\nAgent Flow:")
-    for msg in result['messages']:
-        print(f"{msg}") 
-    
-
-
-   # display_graph()

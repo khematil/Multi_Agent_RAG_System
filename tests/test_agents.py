@@ -1,6 +1,7 @@
 from agents.state import AgentState
 from agents.query_agent import query_agent
 from agents.response_agent import response_agent
+from graph import run_rag_query
 
 def test_query_agent():
     
@@ -11,32 +12,32 @@ def test_query_agent():
         "current_step": "query"
     }
     
-    print("--- Testing Query Agent with State ---")
+    print("=== Testing Query Agent with State ===")
     print("\nInitial State:")
     print(f"\tQuery: {initial_state['query']}")
     print(f"\tStep: {initial_state['current_step']}")
     print(f"\tChunks: {len(initial_state['retrieved_chunks'])}")
 
-    print("\n--- Running Query Agent ---")
+    print("\n=== Running Query Agent ===")
     
     result_state = query_agent(initial_state)
     
-    print("\n--- Result State ---")
+    print("\n=== Result State ===")
     print(f"\n\tStep: {result_state['current_step']}")
     print(f"\tChunks retrieved: {len(result_state['retrieved_chunks'])}")
     
     
-    print("\n--- Top 3 Chunks ---")
+    print("\n=== Top 3 Chunks ===")
     for i, chunk in enumerate(result_state["retrieved_chunks"][:3], 1):
         print(f"\n\t [{i} - Score: {chunk['score']:.3f}")
         print(f"\tSource: {chunk['source']}")
         print(f"\tText: {chunk['text'][:100]}. . .")
         
-    print("\n--- Agent Messages ---")
+    print("\n=== Agent Messages ===")
     for msg in result_state['messages']:
         print(f"\t{msg}")
     
-    print("\n--- Test Complete ---")
+    print("\n=== Test Complete ===")
     
     
 def test_two_agents():
@@ -48,7 +49,7 @@ def test_two_agents():
         "current_step": "query"
     }
     
-    print("=== Testing 2 Agent Flow: [QUERY ---> RESPONSE] ===")
+    print("=== Testing 2 Agent Flow: [QUERY ===> RESPONSE] ===")
     print("\nInitial State:")
     print(f"\tQuery: {initial_state['query']}")
     print(f"\tStep: {initial_state['current_step']}")
@@ -80,6 +81,26 @@ def test_two_agents():
        
     print("\n=== Test Complete ===")
     
+    
+def test_langgraph_orchestration():
+    query = "What is the CAP theorem?"
+    
+    print(f"\nQuestion: {query}\n")
+    
+    result = run_rag_query(query)
+    
+    print(f"\nAnswer:")
+    print(f"{result['final_answer']}\n")
+    
+    print(f"Sources:")
+    for i, chunk in enumerate(result['retrieved_chunks'][:3], 1):
+        print(f"  [{i}] {chunk['source']} (chunk {chunk['chunk_index']}) - {chunk['score']:.3f}")
+    
+    print(f"\nAgent Flow:")
+    for msg in result['messages']:
+        print(f"{msg}") 
+    
 if __name__ == "__main__":
     ##test_query_agent()   
-    test_two_agents()
+    ##test_two_agents()
+    test_langgraph_orchestration()
