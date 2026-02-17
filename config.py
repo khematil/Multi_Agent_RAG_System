@@ -26,3 +26,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 LLM_MODEL = "openai/gpt-oss-20b"
 LLM_TEMP = 0.0
 LLM_MAX_TOKENS = 1024
+
+# Chunk score: Cosine similarity thresholds
+HIGH_CONFIDENCE_THRESHOLD = 0.7  
+LOW_CONFIDENCE_THRESHOLD = 0.4  
