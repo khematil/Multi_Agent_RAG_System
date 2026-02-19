@@ -7,11 +7,9 @@ def response_agent(state: AgentState) -> AgentState:
     quality = state.get('retrieval_quality', 'unknown')
     confidence = state.get('confidence_score', 0.0)
     
-    state['messages'].append("[Response Agent]: Generating response with Claude AI")
+    state['messages'].append("[Response Agent]: Generating response . . .")
 
-    
     # Case 1: No results / poor score
-    
     if not chunks:
         state['messages'].append("[Response Agent]: No chunks available")
         state['current_step'] = 'complete'
@@ -55,23 +53,24 @@ def response_agent(state: AgentState) -> AgentState:
                                     If the context doesn\'t fully answer the question, 
                                     acknowledge what\'s missing.
                                 """
-        prompt = f"""You are a helpful AI assistant answering questions based on the provided context.
+                                
+    prompt = f"""You are a helpful AI assistant answering questions based on the provided context.
+    
+    Context from retrieved documents: {context}
+    
+    User Question: {query}
+    
+    Instructions:
+    
+    1. Answer the questions based ONLY on the information in the context provided.
+    2. Be concise and accurate.
+    3. If the context does not contain enough information to fully answer the questions, say that there is not enough information.
+    4. Cite which source(s) you used in your answer.{confidence_instruction}
+    
+    Answer:
+    """
         
-        Context from retrieved documents: {context}
-        
-        User Question: {query}
-        
-        Instructions:
-        
-        1. Answer the questions based ONLY on the information in the context provided.
-        2. Be concise and accurate.
-        3. If the context does not contain enough information to fully answer the questions, say that there is not enough information.
-        4. Cite which source(s) you used in your answer.{confidence_instruction}
-        
-        Answer:
-        """
-        
-        llm = get_llm()
+    llm = get_llm()
     
     try:
         response = llm.invoke(prompt)

@@ -3,7 +3,6 @@ Run once to ingest data and store it into Qdrant store
 
 """
 
-
 from pathlib import Path
 from langchain_community.document_loaders import TextLoader, CSVLoader, PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter

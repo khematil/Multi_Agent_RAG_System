@@ -9,7 +9,8 @@ from config import (
     GROQ_API_KEY,
     LLM_MODEL,
     LLM_TEMP,
-    LLM_MAX_TOKENS
+    LLM_MAX_TOKENS,
+    HF_TOKEN
 )
 
 def get_qdrant_client():
@@ -18,7 +19,7 @@ def get_qdrant_client():
 
 def get_embedding_model():
     """Get embedding model."""
-    return SentenceTransformer(EMBEDDING_MODEL)
+    return SentenceTransformer(EMBEDDING_MODEL, token=HF_TOKEN)
 
 def get_llm():
     """Get LLM"""
