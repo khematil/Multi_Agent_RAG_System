@@ -27,7 +27,8 @@ mypy>=1.13.0
 tqdm>=4.67.1                  
 loguru>=0.7.3           
 
-## Application
+## API / Frontend
 fastapi[standard]
+streamlit
 
 

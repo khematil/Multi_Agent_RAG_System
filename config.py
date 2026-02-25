@@ -1,11 +1,12 @@
 import os
 from dotenv import load_dotenv
-
+from pathlib import Path
 load_dotenv()
 
 # Paths
-DATA_DIR = "./data"
-QDRANT_PATH = "./qdrant_db"
+PROJECT_ROOT = Path(__file__).parent.absolute()
+DATA_DIR = str(PROJECT_ROOT / "data")
+QDRANT_PATH = str(PROJECT_ROOT / "qdrant_db")
 
 # Model configuration
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
@@ -19,9 +20,6 @@ CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
 ## LLM configuration
-# ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-# LLM_MODEL = "claude-haiku-4-5-20251001"
-
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 LLM_MODEL = "openai/gpt-oss-20b"
 LLM_TEMP = 0.0

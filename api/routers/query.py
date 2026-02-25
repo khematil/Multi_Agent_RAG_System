@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models import QueryRequest, QueryResponse
+from api.models import QueryRequest, QueryResponse
 from graph import run_rag_query
 import time
 

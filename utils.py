@@ -26,6 +26,7 @@ def get_qdrant_client():
     if _qdrant_client is None:
         print("Loading Qdrant client...")
         _qdrant_client = QdrantClient(path=QDRANT_PATH)
+        print(QDRANT_PATH)
     
     return _qdrant_client
 

@@ -2,12 +2,11 @@ from fastapi import FastAPI
 
 from contextlib import asynccontextmanager
 import logging
-from app.routers.query import router as query_router
+from api.routers.query import router as query_router
 from utils import get_qdrant_client, get_embedding_model, get_llm
 from config import DATA_DIR, QDRANT_PATH, COLLECTION_NAME
 
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -27,7 +26,6 @@ async def lifespan(app: FastAPI):
         app.state.llm = get_llm()
         logger.info("LLM client loaded")
         
-        # Store configuration
         app.state.config = {
             "data_dir": DATA_DIR,
             "collection_name": COLLECTION_NAME
@@ -40,12 +38,10 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    logger.info("Shutting downAPI...")
-    
-    
+    logger.info("Shutting down API...")
     logger.info("Shutdown complete")
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(
     query_router,

@@ -1,8 +1,3 @@
-"""
-Run once to ingest data and store it into Qdrant store
-
-"""
-
 from pathlib import Path
 from langchain_community.document_loaders import TextLoader, CSVLoader, PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -38,7 +33,29 @@ def ingest_document(file_path: str):
     documents = loader.load()
     return documents
 
-def process_documents(directory_path: str):
+def process_single_document(file_path: str):
+    documents = ingest_document(file_path)
+    
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP
+    )
+    
+    chunks = text_splitter.split_documents(documents)
+    
+    filename = Path(file_path).name
+    for i, chunk in enumerate(chunks):
+        chunk.metadata['source_file'] = filename
+        chunk.metadata['chunk_index'] = i
+        chunk.metadata['total_chunks'] = len(chunks)
+    
+    return {
+        "chunks": chunks,
+        "filename": filename,
+        "count": len(chunks)   
+    }
+
+def process_documents(directory_path: str, skip_existing: bool = True):
     """
     Process all documents in a directory and return chunked texts.
     
@@ -54,12 +71,19 @@ def process_documents(directory_path: str):
         'files_processed': 0,
         'files_failed': 0,
         'files_skipped': 0,
+        'files_already_exists': 0,
         'total_chunks': 0,
         'by_file': {}
     }
     
     dir = Path(directory_path)
     extensions = ['.csv', '.txt', '.pdf']
+    
+    
+    existing_files = get_existing_files_in_qdrant() if skip_existing else set()
+    if existing_files:
+        print(f"Found {len(existing_files)} files already in Qdrant\n")
+        print(f"Will skip: {', '.join(sorted(existing_files))}\n")
     
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
@@ -76,7 +100,11 @@ def process_documents(directory_path: str):
             print(f"Skipping unsupported file: {file_path.name}")
             stats['files_skipped'] += 1
             continue
-            
+
+        if skip_existing and file_path.name in existing_files:
+            print(f"Skipping (already exists): {file_path.name}")
+            stats['files_already_exists'] += 1
+            continue
         try:
             print("Processing:", file_path.name)
             
@@ -104,6 +132,7 @@ def process_documents(directory_path: str):
     print(f"\n{'='*60}")
     print(f"Processing Summary:")
     print(f"\tFiles processed: {stats['files_processed']}")
+    print(f"\tFiles already existed: {stats['files_already_exists']}")
     print(f"\tFiles failed: {stats['files_failed']}")
     print(f"\tFiles skipped: {stats['files_skipped']}")
     print(f"\tTotal chunks: {stats['total_chunks']}")
@@ -124,13 +153,9 @@ def store_in_qdrant(chunks: list):
     
     try:
         collection_info = client.get_collection(COLLECTION_NAME)
-        print(f"\tCollection '{COLLECTION_NAME}' exists ({collection_info.points_count} existing points)")
+        existing_count = collection_info.points_count
+        print(f"\tCollection '{COLLECTION_NAME}' exists ({existing_count} existing points)")
         
-        response = input("\tClear existing data? (y/n): ").lower()
-        if response == 'y':
-            client.delete_collection(COLLECTION_NAME)
-            print("\tDeleted old collection")
-            raise Exception("Recreate")
     except:
         print(f"\t Creating new collection '{COLLECTION_NAME}")
         client.create_collection(
@@ -140,16 +165,13 @@ def store_in_qdrant(chunks: list):
                 distance=Distance.COSINE
             )
         )
+        existing_count = 0
+    
+    start_id = existing_counts
     
     print("\tGenerating embeddings")
     texts = [chunk.page_content for chunk in chunks]
     embeddings = model.encode(texts, show_progress_bar=True)
-    
-    try:
-        collection_info = client.get_collection(COLLECTION_NAME)
-        start_id = collection_info.points_count
-    except:
-        start_id = 0
         
     print("\tCreating points...")
     points = []
@@ -174,6 +196,79 @@ def store_in_qdrant(chunks: list):
     final_count = client.get_collection(COLLECTION_NAME).points_count
     print(f"\tTotal points in collection: {final_count}")
 
+def get_existing_files_in_qdrant() -> set:
+    """
+    Get set of filenames already in Qdrant.
+    
+    Returns:
+        Set of filenames (e.g., {'file1.txt', 'file2.pdf'})
+    """
+    try:
+        client = get_qdrant_client()
+        
+        existing_files = set()
+        offset = None
+        
+        while True:
+            records, next_offset = client.scroll(
+                collection_name=COLLECTION_NAME,
+                limit=100,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False  
+            )
+            
+            for record in records:
+                source_file = record.payload.get('source_file')
+                if source_file:
+                    existing_files.add(source_file)
+            
+            if next_offset is None:
+                break
+            offset = next_offset
+        
+        return existing_files
+        
+    except Exception as e:
+        print(f"Warning: Could not check existing files: {e}")
+        return set()  
+
+
+def clear_collection():
+    """Delete the entire Qdrant collection."""
+    
+    print("="*80)
+    print("WARNING: CLEAR QDRANT COLLECTION")
+    print("="*80)
+    print(f"\nThis will DELETE all data in '{COLLECTION_NAME}'")
+    print("This action CANNOT be undone!\n")
+    
+    # 2x Confirm
+    confirm1 = input("Type 'DELETE' to confirm: ")
+    if confirm1 != "DELETE":
+        print("Cancelled")
+        return
+    
+    confirm2 = input("Are you absolutely sure? (yes/no): ")
+    if confirm2.lower() != "yes":
+        print("Cancelled")
+        return
+    
+    try:
+        client = get_qdrant_client()
+        info = client.get_collection(COLLECTION_NAME)
+        
+        print(f"\nDeleting collection with {info.points_count} points...")
+        client.delete_collection(COLLECTION_NAME)
+        print("Collection deleted successfully")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+
+
 def main():
     
     parser = argparse.ArgumentParser(description='Ingest documents into RAG system')
@@ -196,6 +291,7 @@ def main():
     print("\n" + "="*80)
     print("INGESTION COMPLETE")
     print("="*80)
+
 
 if __name__ == "__main__":
     main()
