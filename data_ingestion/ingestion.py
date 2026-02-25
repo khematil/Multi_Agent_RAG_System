@@ -8,7 +8,8 @@ from config import *
 from utils import get_qdrant_client, get_embedding_model
 
 def ingest_document(file_path: str):
-    """Function that ingests documents located in a file path / folder
+    """
+    Function that ingests documents located in a file path / folder
 
     Args:
         file_path (str): path of where data files are located
@@ -33,27 +34,52 @@ def ingest_document(file_path: str):
     documents = loader.load()
     return documents
 
-def process_single_document(file_path: str):
-    documents = ingest_document(file_path)
+def process_single_document(file_path: str) -> tuple:
+    """
+    Process a single file: load, chunk, and add metadata.
     
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP
-    )
-    
-    chunks = text_splitter.split_documents(documents)
+    Args:
+        file_path: Path to file
+        
+    Returns:
+        Tuple of (chunks, stats_dict)
+    """
     
     filename = Path(file_path).name
-    for i, chunk in enumerate(chunks):
-        chunk.metadata['source_file'] = filename
-        chunk.metadata['chunk_index'] = i
-        chunk.metadata['total_chunks'] = len(chunks)
-    
-    return {
-        "chunks": chunks,
-        "filename": filename,
-        "count": len(chunks)   
-    }
+    try:
+        # 1. Load document
+        print(f"Processing: {filename}")
+        document = ingest_document(file_path)
+        
+        # 2. Chunk document
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=CHUNK_SIZE,
+            chunk_overlap=CHUNK_OVERLAP,
+            length_function=len,
+            separators=["\n\n", "\n", ". ", " ", ""]
+        )
+        
+        chunks = text_splitter.split_documents(document)
+        print(f"\tCreated {len(chunks)} chunks")
+        
+        # 3. Add metadata for logging
+        for i, chunk in enumerate(chunks):
+            chunk.metadata['source_file'] = filename
+            chunk.metadata['chunk_index'] = i
+            chunk.metadata['total_chunks'] = len(chunks)
+        
+        return chunks, {
+            "success": True,
+            "filename": filename,
+            "chunks_created": len(chunks)   
+        }
+    except Exception as e:
+        print(f"Error: {e}")
+        return [], {
+            'success': False,
+            'filename': filename,
+            'error': str(e)
+        }
 
 def process_documents(directory_path: str, skip_existing: bool = True):
     """
@@ -85,13 +111,6 @@ def process_documents(directory_path: str, skip_existing: bool = True):
         print(f"Found {len(existing_files)} files already in Qdrant\n")
         print(f"Will skip: {', '.join(sorted(existing_files))}\n")
     
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE,
-        chunk_overlap=CHUNK_OVERLAP,
-        length_function=len,
-        separators=["\n\n", "\n", ". ", " ", ""]
-    )
-    
     for file_path in dir.iterdir():
         if not file_path.is_file():
             continue
@@ -105,28 +124,17 @@ def process_documents(directory_path: str, skip_existing: bool = True):
             print(f"Skipping (already exists): {file_path.name}")
             stats['files_already_exists'] += 1
             continue
-        try:
-            print("Processing:", file_path.name)
-            
-            documents = ingest_document(str(file_path))
-            print(f"\tLoaded {len(documents)} document(s)")
-            
-            chunks = text_splitter.split_documents(documents)
-            print(f"\tCreated {len(chunks)} chunks")
-            
-            for i, chunk in enumerate(chunks):
-                chunk.metadata['source_file'] = file_path.name
-                chunk.metadata['chunk_index'] = i
-                chunk.metadata['total_chunks'] = len(chunks)
-                
+        
+        chunks, file_stats = process_single_document(str(file_path))
+        
+        
+        if file_stats["success"]:
             all_chunks.extend(chunks)
-            stats['files_processed'] += 1
-            stats['by_file'][file_path.name] = len(chunks)
+            stats["files_processed"] += 1
+            stats["by_file"][file_path.name] = len(chunks)
+        else:
+            stats["files_failed"] += 1
             
-        except Exception as e:
-            print(f"Error processing {file_path.name}: {e}")
-            stats['files_failed'] += 1 
-            continue
     stats['total_chunks'] = len(all_chunks)
     
     print(f"\n{'='*60}")
@@ -167,7 +175,7 @@ def store_in_qdrant(chunks: list):
         )
         existing_count = 0
     
-    start_id = existing_counts
+    start_id = existing_count
     
     print("\tGenerating embeddings")
     texts = [chunk.page_content for chunk in chunks]
@@ -294,4 +302,5 @@ def main():
 
 
 if __name__ == "__main__":
+    clear_collection()
     main()

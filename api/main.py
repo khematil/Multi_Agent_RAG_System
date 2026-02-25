@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from contextlib import asynccontextmanager
 import logging
-from api.routers.query import router as query_router
+from api.routers import query, documents
 from utils import get_qdrant_client, get_embedding_model, get_llm
 from config import DATA_DIR, QDRANT_PATH, COLLECTION_NAME
 
@@ -44,9 +44,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(
-    query_router,
-    prefix="/api"
+    query.router,
+    prefix="/api",
+    tags=["query"]
 )
+app.include_router(
+    documents.router,
+    prefix="/api",
+    tags=["documents"]
+)
+
 @app.get("/")
 async def root():
     return {
@@ -66,15 +73,3 @@ async def health_check():
         "status": "healthy",
         "service": "RAG Multi Agent System API"
     }
-
-# @app.post("/api/query")
-# async def query_rag(query: str):
-#     return 
-
-# @app.get("/health")
-# async def get_server_status():
-#     return
-
-# @app.post("/api/ingest")
-# async def ingest_documents(file):
-#     return
