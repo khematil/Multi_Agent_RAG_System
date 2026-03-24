@@ -90,7 +90,7 @@ with chatTab:
             """
             This is a multi-agent RAG system powered by:
             - a Query Agent
-            - a Analysis Agent
+            - a Retrieval Analysis Agent
             - a Response Agent
             
             Built with LangGraph, FastAPI.
@@ -166,7 +166,6 @@ if uploaded_file is not None:
                         "file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)
                     }
                     
-                    # Upload to API
                     upload_url = SL_API_URL.replace("/query/", "/documents/upload")
                     response = requests.post(
                         upload_url,
