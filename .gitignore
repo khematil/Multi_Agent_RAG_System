@@ -7,3 +7,5 @@ Lib/
 include/
 share/
 *pyc
+pyvenv.cfg
+
