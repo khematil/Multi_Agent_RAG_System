@@ -18,10 +18,8 @@ python ingestion.py
 
 ## Sample Data
 Sample documents are in `data/samples/` for testing.
-```
 
-### **4. `LICENSE`** (MIT recommended)
-```
+### **4. LICENSE**
 MIT License
 
 Copyright (c) 2026 Kyle Hematillake

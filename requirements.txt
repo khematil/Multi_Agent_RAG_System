@@ -1,7 +1,5 @@
 ## LLM / Agents
 langchain-community>=0.0.20
-# langchain-anthropic
-# anthropic
 langchain-groq
 langgraph
 pypdf>=3.17.0
