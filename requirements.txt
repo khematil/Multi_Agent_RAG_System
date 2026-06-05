@@ -1,6 +1,7 @@
 ## LLM / Agents
 langchain-community>=0.0.20
 langchain-groq
+langchain_huggingface
 langgraph
 pypdf>=3.17.0
 qdrant-client==1.12.1
