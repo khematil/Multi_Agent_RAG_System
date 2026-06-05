@@ -6,7 +6,6 @@ load_dotenv()
 # Paths
 PROJECT_ROOT = Path(__file__).parent.absolute()
 DATA_DIR = str(PROJECT_ROOT / "data")
-# QDRANT_PATH = str(PROJECT_ROOT / "qdrant_db")
 
 BASE_VERCEL_URL = os.getenv("SL_API_URL")
 VERCEL_BYPASS = os.getenv("VERCEL_BYPASS_SECRET")
