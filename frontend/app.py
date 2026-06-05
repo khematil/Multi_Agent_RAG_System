@@ -4,7 +4,7 @@ import time
 import io
 from datetime import datetime
 
-SL_API_URL = "http://localhost:8000/api/query/"
+SL_API_URL = "https://multi-agent-rag-system-ie4pf9fxz-khematillake-3548s-projects.vercel.app/"
 
 
 st.set_page_config(

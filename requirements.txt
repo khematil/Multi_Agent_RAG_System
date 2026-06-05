@@ -3,8 +3,6 @@ langchain-community>=0.0.20
 langchain-groq
 langgraph
 pypdf>=3.17.0
-pandas>=2.0.0
-sentence-transformers 
 qdrant-client==1.12.1
 
 ## Hugging Face
