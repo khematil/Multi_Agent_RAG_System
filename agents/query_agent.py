@@ -10,12 +10,12 @@ def query_agent(state: AgentState) -> AgentState:
     client = get_qdrant_client()
     model = get_embedding_model()
     
-    query_vector = model.encode([query])[0]
+    query_vector = model.embed_query(query)
     
     
     results = client.query_points(
         collection_name=COLLECTION_NAME,
-        query=query_vector.tolist(),
+        query=query_vector,
         limit=5
     )
     

@@ -179,7 +179,8 @@ def store_in_qdrant(chunks: list):
     
     print("\tGenerating embeddings")
     texts = [chunk.page_content for chunk in chunks]
-    embeddings = model.encode(texts, show_progress_bar=True)
+    # embeddings = model.encode(texts, show_progress_bar=True)
+    embeddings = model.embed_documents(texts) # LangChain API use
         
     print("\tCreating points...")
     points = []
@@ -187,7 +188,7 @@ def store_in_qdrant(chunks: list):
     for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         points.append(PointStruct(
             id=start_id + i, 
-            vector=embedding.tolist(),
+            vector=embedding,
             payload={
                 'text': chunk.page_content,
                 'source_file': chunk.metadata.get('source_file', 'unknown'),

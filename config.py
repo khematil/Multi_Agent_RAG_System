@@ -6,13 +6,16 @@ load_dotenv()
 # Paths
 PROJECT_ROOT = Path(__file__).parent.absolute()
 DATA_DIR = str(PROJECT_ROOT / "data")
-QDRANT_PATH = str(PROJECT_ROOT / "qdrant_db")
+# QDRANT_PATH = str(PROJECT_ROOT / "qdrant_db")
 
 BASE_VERCEL_URL = os.getenv("SL_API_URL")
 VERCEL_BYPASS = os.getenv("VERCEL_BYPASS_SECRET")
 
+QDRANT_URL = os.getenv("QDRANT_URL") # Cloud
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+
 # Model configuration
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIMENSION = 384
 
 # Collection configuration

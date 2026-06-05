@@ -4,7 +4,7 @@ from graph import run_rag_query
 
 def query_rag(client, model, question: str, n_results: int = 5):
 
-    query_vector = model.encode([question])[0]
+    query_vector = model.embed_query([question])[0]
     
     results = client.query_points(
         collection_name=COLLECTION_NAME,
