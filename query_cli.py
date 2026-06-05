@@ -4,11 +4,11 @@ from graph import run_rag_query
 
 def query_rag(client, model, question: str, n_results: int = 5):
 
-    query_vector = model.embed_query(question)
+    query_vector = model.encode([question])[0]
     
     results = client.query_points(
         collection_name=COLLECTION_NAME,
-        query=query_vector,
+        query=query_vector.tolist(),
         limit=n_results
     )
     
@@ -23,6 +23,7 @@ def display_results(result):
     print(f"Sources:")
     for i, chunk in enumerate(result['retrieved_chunks'][:3], 1):
         print(f"  [{i}] {chunk['source']} (chunk {chunk['chunk_index']}) - [Score] {chunk['score']:.3f}")
+    
     
     print(f"\nAgent Flow:")
     for msg in result['messages']:

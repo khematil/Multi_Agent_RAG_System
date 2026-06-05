@@ -1,12 +1,14 @@
 from qdrant_client import QdrantClient
-import logging
-from langchain_huggingface import HuggingFaceEndpointEmbeddings
-from langchain_groq import ChatGroq
+from sentence_transformers import SentenceTransformer
+#from langchain_anthropic import ChatAnthropic
 
+import logging
+
+from langchain_groq import ChatGroq
 from config import (
-    QDRANT_URL,
-    QDRANT_API_KEY,
+    QDRANT_PATH, 
     EMBEDDING_MODEL,
+    # ANTHROPIC_API_KEY,
     GROQ_API_KEY,
     LLM_MODEL,
     LLM_TEMP,
@@ -23,10 +25,8 @@ def get_qdrant_client():
     
     if _qdrant_client is None:
         print("Loading Qdrant client...")
-        _qdrant_client = QdrantClient(url=QDRANT_URL,
-                                      api_key=QDRANT_API_KEY
-                                    )
-        print("Qdrant cloud connected ... ")
+        _qdrant_client = QdrantClient(path=QDRANT_PATH)
+        print(QDRANT_PATH)
     
     return _qdrant_client
 
@@ -35,12 +35,8 @@ def get_embedding_model():
     
     if _embedding_model is None:
         print("Loading embedding model...")
-        print(f"Connecting to Hugging Face Inference API for {EMBEDDING_MODEL}...")
-    
-        _embedding_model = HuggingFaceEndpointEmbeddings(
-            huggingfacehub_api_token=HF_TOKEN,
-            model=EMBEDDING_MODEL
-        )
+        logging.getLogger('sentence_transformers').setLevel(logging.ERROR)
+        _embedding_model = SentenceTransformer(EMBEDDING_MODEL)
     
     return _embedding_model
 
