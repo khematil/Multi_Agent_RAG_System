@@ -14,6 +14,7 @@ def query_agent(state: AgentState) -> AgentState:
     
     results = client.query_points(
         collection_name=COLLECTION_NAME,
+        
         query=query_vector,
         limit=5
     )
