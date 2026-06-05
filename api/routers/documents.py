@@ -80,8 +80,13 @@ async def upload_document(
                     detail=f"File '{file.filename} already exists. Set force=true to overwrite."
                 )
         
-        upload_dir = Path(DATA_DIR)
-        upload_dir.mkdir(parents = True, exist_ok=True)
+        # LOCAL
+        # upload_dir = Path(DATA_DIR)
+        # upload_dir.mkdir(parents = True, exist_ok=True)
+        # file_path = upload_dir / file.filename
+
+        # VERCEL
+        upload_dir = Path("/tmp")  
         file_path = upload_dir / file.filename
         
         with open(file_path, "wb") as buffer:
@@ -95,6 +100,9 @@ async def upload_document(
     
         store_in_qdrant(chunks)
         
+        if file_path.exists():
+            file_path.unlink()
+            
         client = get_qdrant_client()
         final_count = client.get_collection(COLLECTION_NAME).points_count
         total_docs = len(get_existing_files_in_qdrant())
