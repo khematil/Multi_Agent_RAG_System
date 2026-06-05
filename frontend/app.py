@@ -1,10 +1,22 @@
 import streamlit as st
 import requests
-import time
-import io
-from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv()
 
-SL_API_URL = "https://multi-agent-rag-system-ie4pf9fxz-khematillake-3548s-projects.vercel.app/"
+
+BASE_VERCEL_URL = st.secrets["BASE_VERCEL_URL"]
+BYPASS_TOKEN = st.secrets["VERCEL_BYPASS_TOKEN"]
+
+
+CHAT_API_URL = f"{BASE_VERCEL_URL}/query/"
+UPLOAD_API_URL = f"{BASE_VERCEL_URL}/documents/upload"
+LIST_API_URL = f"{BASE_VERCEL_URL}/documents/list"
+
+
+headers = {
+    "x-vercel-protection-bypass": BYPASS_TOKEN
+}
+
 
 
 st.set_page_config(
@@ -26,7 +38,6 @@ if "include_sources" not in st.session_state:
     st.session_state.include_sources = True
     
 def query_api(question: str, max_results: int = 5, include_sources: bool = True) -> dict:
-
     payload = {
         "question": question,
         "max_results": max_results,
@@ -35,15 +46,16 @@ def query_api(question: str, max_results: int = 5, include_sources: bool = True)
     
     try:
         response = requests.post(
-            SL_API_URL,
+            CHAT_API_URL,        
             json=payload,
+            headers=headers,     
             timeout=30  
         )
         response.raise_for_status() 
         return response.json()
         
     except requests.exceptions.ConnectionError:
-        raise Exception("Cannot connect to API. Is the backend running at " + SL_API_URL + "?")
+        raise Exception(f"Cannot connect to API. Is the backend running at {CHAT_API_URL}?")
     except requests.exceptions.Timeout:
         raise Exception("Request timed out. The query might be too complex.")
     except requests.exceptions.HTTPError as e:
@@ -64,11 +76,9 @@ with chatTab:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-
     with st.sidebar:
         st.title("Settings")
         
-
         # Toggle sources
         st.session_state.include_sources = st.checkbox(
             "Show Sources",
@@ -78,7 +88,6 @@ with chatTab:
         
         st.divider()
         
-
         if st.button("Clear Chat History", use_container_width=True):
             st.session_state.messages = []
             st.rerun()
@@ -102,11 +111,9 @@ with chatTab:
     
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # User message
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        # AI Chat Message
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
@@ -124,8 +131,6 @@ with chatTab:
                     
                     st.markdown(answer)
                     
-                    
-                    # Add to chat history
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": answer,
@@ -140,7 +145,6 @@ with chatTab:
                 except Exception as e:
                     error_message = f"Error: {str(e)}"
                     st.error(error_message)
-                    
                     st.session_state.messages.append({
                         "role": "assistant",
                         "content": error_message
@@ -157,50 +161,50 @@ with ingestTab:
     )
     
 if uploaded_file is not None:
-        st.info(f"**File:** {uploaded_file.name} ({uploaded_file.size} bytes)")
-        
-        if st.button("Upload and Ingest", type="primary", use_container_width=True):
-            with st.spinner("Uploading and processing..."):
-                try:
-                    files = {
-                        "file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)
-                    }
+    st.info(f"**File:** {uploaded_file.name} ({uploaded_file.size} bytes)")
+    
+    if st.button("Upload and Ingest", type="primary", use_container_width=True):
+        with st.spinner("Uploading and processing..."):
+            try:
+                files = {
+                    "file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)
+                }
+                
+                response = requests.post(
+                    UPLOAD_API_URL,     
+                    files=files,
+                    headers=headers,    
+                    timeout=60 
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    st.success(f"{data['message']}")
                     
-                    upload_url = SL_API_URL.replace("/query/", "/documents/upload")
-                    response = requests.post(
-                        upload_url,
-                        files=files,
-                        timeout=60 
-                    )
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.metric("Chunks Created", data['chunks_created'])
+                    with col2:
+                        st.metric("Total Documents", data['total_documents'])
+                else:
+                    st.error(f"Upload failed: {response.text}")
                     
-                    print(response)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        st.success(f"{data['message']}")
-                        
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.metric("Chunks Created", data['chunks_created'])
-                        with col2:
-                            st.metric("Total Documents", data['total_documents'])
-                    else:
-                        st.error(f"Upload failed: {response.text}")
-                        
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
     
 st.divider()
 
-# List existing documents
 st.subheader("Current Documents")
 
 if st.button("Refresh List"):
     st.rerun()
 
 try:
-    list_url = SL_API_URL.replace("/query/", "/documents/list")
-    response = requests.get(list_url, timeout=5)
+    response = requests.get(
+        LIST_API_URL,       
+        headers=headers,    
+        timeout=5
+    )
     
     if response.status_code == 200:
         data = response.json()
@@ -211,7 +215,6 @@ try:
         with col2:
             st.metric("Unique Documents", data['unique_documents'])
         
-        # Show document list
         if data['documents']:
             st.markdown("**Documents in system:**")
             for i, doc in enumerate(data['documents'], 1):
@@ -219,11 +222,14 @@ try:
                 with col1:
                     st.text(f"{i}. {doc}")
                 with col2:
-                    
                     if st.button("Delete", key=f"delete_{doc}"):
-                        delete_url = SL_API_URL.replace("/query/", f"/documents/{doc}")
+                        delete_url = f"{BASE_VERCEL_URL}/documents/{doc}"
                         try:
-                            del_response = requests.delete(delete_url, timeout=10)
+                            del_response = requests.delete(
+                                delete_url, 
+                                headers=headers,  
+                                timeout=10
+                            )
                             if del_response.status_code == 200:
                                 st.success(f"Deleted {doc}")
                                 st.rerun()
