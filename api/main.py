@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import logging
 from api.routers import query, documents
 from utils import get_qdrant_client, get_embedding_model, get_llm
-from config import DATA_DIR, QDRANT_PATH, COLLECTION_NAME
+from config import DATA_DIR, QDRANT_URL, COLLECTION_NAME
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Loading Qdrant client...")
         app.state.qdrant_client = get_qdrant_client()
-        logger.info(f"Qdrant client loaded (path: {QDRANT_PATH})")
+        logger.info(f"Qdrant client loaded (path: {QDRANT_URL})")
         
         logger.info("Loading embedding model...")
         app.state.embedding_model = get_embedding_model()

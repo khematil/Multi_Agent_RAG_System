@@ -1,5 +1,4 @@
 from qdrant_client import QdrantClient
-import logging
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_groq import ChatGroq
 
