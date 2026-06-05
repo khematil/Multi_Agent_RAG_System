@@ -5,18 +5,12 @@ langgraph
 pypdf>=3.17.0
 qdrant-client==1.12.1
 
-## Hugging Face
-datasets 
-
 ## Data Processing & Utilities
-numpy>=2.2.1                   
 python-dotenv>=1.0.1          
 
 ## Development Tools
 pytest>=8.3.4                  
-pytest-asyncio>=0.24.0         
-black>=24.10.0                 
-flake8>=7.1.1                  
+pytest-asyncio>=0.24.0                      
 mypy>=1.13.0                   
 
 ## Progress & Logging
