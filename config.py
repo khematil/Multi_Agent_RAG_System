@@ -1,16 +1,21 @@
 import os
+import platform
 from dotenv import load_dotenv
 from pathlib import Path
 load_dotenv()
 
-# Paths
 PROJECT_ROOT = Path(__file__).parent.absolute()
-DATA_DIR = str(PROJECT_ROOT / "data")
+
+if platform.system() == "Windows":
+    DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+else:
+    DATA_DIR = "/tmp"
+
 
 BASE_VERCEL_URL = os.getenv("SL_API_URL")
 VERCEL_BYPASS = os.getenv("VERCEL_BYPASS_SECRET")
 
-QDRANT_URL = os.getenv("QDRANT_URL") # Cloud
+QDRANT_URL = os.getenv("QDRANT_URL") 
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 
 # Model configuration
