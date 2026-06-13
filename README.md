@@ -12,7 +12,7 @@ This system implements RAG by having an **Analysis Agent** that evaluates retrie
     - If scores are high, it proceeds to generation.
     - If scores are medium, it proceeds but adds a caveat about potential incompleteness.
     - If scores are low/non-existent, it triggers a fallback response explaining why it cannot answer.
-3.  **Response Agent**: SynthGeneratesesizes the final answer using an LLM (Large Language Model) based *only* on the provided context.
+3.  **Response Agent**: Generates the final answer using an LLM (Large Language Model) based *only* on the provided context.
 
 ##  Key Features
 
@@ -21,7 +21,7 @@ This system implements RAG by having an **Analysis Agent** that evaluates retrie
 -   **Multi-Format Support**: Ingest and query `.txt`, `.pdf`, and `.csv` files.
 -   **Full CRUD Operations**: Upload, list, and delete documents from the vector store via the UI or API.
 -   **Professional UI**: Streamlit-based dashboard with chat history, document management, and real-time metrics.
--   **Production-Ready API**: Robust FastAPI implementation with Pydantic models for data validation.
+-   **Robust API**: FastAPI implementation with Pydantic models for data validation.
 
 ##  Tech Stack
 
@@ -90,5 +90,5 @@ streamlit run app.py
 
 1.  **Upload Documents**: Use the "Upload Documents" tab in the Streamlit UI to add your knowledge base.
 2.  **Ask Questions**: Navigate to the "Chat" tab and ask questions. 
-3.  **Monitor Quality**: Notice the confidence scores and retrieval quality indicators provided in the system messages.
+3.  **Monitor Quality**: Check confidence scores and retrieval quality indicators provided in the system messages.
 4.  **Manage Data**: Use the "Current Documents" section to refresh the list or delete old files to maintain your index.
