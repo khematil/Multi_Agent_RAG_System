@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi_agent_rag_system"
+version = "0.1.0"
+dependencies = [] # Your requirements.txt handles these
+
+[tool.setuptools]
+py-modules = ["config", "graph", "utils"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["api*", "agents*", "data_ingestion*", "tests*", "config*", "utils*"]

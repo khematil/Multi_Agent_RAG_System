@@ -80,14 +80,12 @@ async def upload_document(
                     detail=f"File '{file.filename} already exists. Set force=true to overwrite."
                 )
         
-        # LOCAL
-        # upload_dir = Path(DATA_DIR)
-        # upload_dir.mkdir(parents = True, exist_ok=True)
-        # file_path = upload_dir / file.filename
 
-        # VERCEL
-        upload_dir = Path("/tmp")  
+
+        upload_dir = Path(DATA_DIR)
         file_path = upload_dir / file.filename
+
+
         
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)

@@ -15,7 +15,7 @@ def analysis_agent(state: AgentState) -> AgentState:
         state["confidence_score"] = 0.0
         state['generate_response'] = False
         state["analysis_reason"] = "No relevant documents found in database"
-        state["final_answer"] = generate_response(query, chunks, top_score)
+        state["final_answer"] = generate_response(query, chunks, 0.0)
         state["messages"].append("[Analysis Agent]: No chunks retrieved - low confidence")
         print("No results found - skipping [Response Agent]")
         return state

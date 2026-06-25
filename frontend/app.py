@@ -49,7 +49,7 @@ def query_api(question: str, max_results: int = 5, include_sources: bool = True)
             CHAT_API_URL,        
             json=payload,
             headers=headers,     
-            timeout=30  
+            timeout=60  
         )
         response.raise_for_status() 
         return response.json()
@@ -174,7 +174,7 @@ if uploaded_file is not None:
                     UPLOAD_API_URL,     
                     files=files,
                     headers=headers,    
-                    timeout=60 
+                    timeout=600 
                 )
                 
                 if response.status_code == 200:

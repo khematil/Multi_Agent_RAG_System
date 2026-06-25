@@ -1,21 +1,23 @@
 import os
 import platform
+import logging
 from dotenv import load_dotenv
 from pathlib import Path
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).parent.absolute()
 
-if platform.system() == "Windows":
-    DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-else:
+if Path("/tmp").exists() and os.name == "posix":
     DATA_DIR = "/tmp"
+else:
+    DATA_DIR = str(PROJECT_ROOT / "data")
+    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
 
 
-BASE_VERCEL_URL = os.getenv("SL_API_URL")
+BASE_VERCEL_URL = os.getenv("BASE_VERCEL_URL")
 VERCEL_BYPASS = os.getenv("VERCEL_BYPASS_SECRET")
 
-QDRANT_URL = os.getenv("QDRANT_URL") 
+QDRANT_URL = os.getenv("QDRANT_ENDPOINT") 
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 
 # Model configuration
@@ -35,7 +37,7 @@ LLM_MODEL = "openai/gpt-oss-20b"
 LLM_TEMP = 0.0
 LLM_MAX_TOKENS = 1024
 
-## Hugging Face 
+## Hugging Face
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 # Chunk score: Cosine similarity thresholds

@@ -3,6 +3,7 @@ from agents.query_agent import query_agent
 from agents.analysis_agent import analysis_agent
 from agents.response_agent import response_agent
 from graph import run_rag_query
+import platform
 
 class TestQueryAgent:
     def test_query_agent_retrieves_chunks(self):
@@ -152,3 +153,6 @@ def test_langgraph_orchestration():
     for msg in result['messages']:
         print(f"{msg}") 
     
+if __name__ == "__main__":
+
+    print(platform.system())

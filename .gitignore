@@ -8,4 +8,7 @@ include/
 share/
 *pyc
 pyvenv.cfg
-
+data
+data-ingestion
+multi_agent_rag_system.egg-info
+.venv
